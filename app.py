@@ -40,6 +40,15 @@ def webhook():
         )
 
     return "ok"
+@app.route("/setup-webhook")
+def setup_webhook():
+    webhook_url = "https://telegram-game-ai-1.onrender.com/webhook"
 
+    response = requests.get(
+        f"https://api.telegram.org/bot{TOKEN}/setWebhook",
+        params={"url": webhook_url}
+    )
+
+    return response.json()
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
