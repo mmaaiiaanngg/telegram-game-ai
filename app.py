@@ -14,7 +14,7 @@ app = Flask(__name__)
 TOKEN = os.getenv("BOT_TOKEN")
 DRIVE_FOLDER_ID = os.getenv("DRIVE_FOLDER_ID")
 GOOGLE_KEY_FILE = "/etc/secrets/google-service-account.json"
-
+DROPBOX_SHARED_URL = "https://www.dropbox.com/scl/fo/vaw97cwctz6rkbzp47u8q/h?rlkey=pseqzodk25k3oxswdaox5a5gr&dl=1"
 
 def send_message(chat_id, text):
     requests.post(
