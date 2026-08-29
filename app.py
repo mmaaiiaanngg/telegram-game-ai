@@ -43,7 +43,20 @@ def get_drive_files():
     ).execute()
 
     return result.get("files", [])
+def download_drive_file(file_id):
+    credentials = service_account.Credentials.from_service_account_file(
+        GOOGLE_KEY_FILE,
+        scopes=["https://www.googleapis.com/auth/drive.readonly"]
+    )
 
+    drive = build(
+        "drive",
+        "v3",
+        credentials=credentials,
+        cache_discovery=False
+    )
+
+    return drive.files().get_media(fileId=file_id).execute()
 
 @app.route("/")
 def home():
@@ -83,11 +96,45 @@ def webhook():
 
         elif text.startswith("/cover"):
             game = text.replace("/cover", "").strip()
-
-            if game:
-                msg = f"รับคำสั่งแล้ว 🎮\nเกม: {game}"
-            else:
-                msg = "กรุณาระบุชื่อเกม เช่น\n/cover Mahjong Ways"
+    
+        if game:
+            try:
+                files = get_drive_files()
+                game_key = game.lower().replace(" ", "-")
+    
+                matched_files = [
+                    f for f in files
+                    if game_key in f["name"].lower()
+                    and f.get("mimeType", "").startswith("image/")
+                ]
+    
+                if matched_files:
+                    image_file = matched_files[0]
+                    image_bytes = download_drive_file(image_file["id"])
+    
+                    requests.post(
+                        f"https://api.telegram.org/bot{TOKEN}/sendPhoto",
+                        data={
+                            "chat_id": chat_id,
+                            "caption": f"🎮 {game}\n📁 {image_file['name']}"
+                        },
+                        files={
+                            "photo": (image_file["name"], image_bytes)
+                        },
+                        timeout=30
+                    )
+    
+                    return "ok"
+    
+                else:
+                    msg = f"❌ ไม่พบรูปเกม {game} ใน Google Drive"
+    
+            except Exception as e:
+                print("Cover error:", e)
+                msg = "❌ ดึงรูปจาก Google Drive ไม่สำเร็จ กรุณาตรวจสอบ Logs"
+    
+        else:
+            msg = "กรุณาระบุชื่อเกม เช่น\n/cover Mahjong Ways"
 
         else:
             msg = "พิมพ์ /start เพื่อเริ่มใช้งาน"
