@@ -185,7 +185,7 @@ def webhook():
                 print("Drive error:", e)
                 msg = "❌ ยังอ่าน Google Drive ไม่สำเร็จ กรุณาตรวจสอบ Logs"
  
-                elif text == "/import":
+        elif text == "/import":
             msg = "⏳ กำลังนำเข้ารูปจาก Dropbox ไป Google Drive..."
             threading.Thread(target=run_import, args=(chat_id,), daemon=True).start()
         elif text.startswith("/cover"):
