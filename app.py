@@ -191,8 +191,8 @@ def webhook():
         elif text.startswith("/cover"):
             game = text.replace("/cover", "").strip()
             
-        if game:
-            try:
+            if text.startswith("/cover") and game:
+                try:
                 files = get_drive_files()
                 game_key = game.lower().replace(" ", "-")
     
@@ -227,7 +227,7 @@ def webhook():
                 print("Cover error:", e)
                 msg = "❌ ดึงรูปจาก Google Drive ไม่สำเร็จ กรุณาตรวจสอบ Logs"
     
-            else:
+            elif text.startswith("/cover"):
                 msg = "กรุณาระบุชื่อเกม เช่น\n/cover Mahjong Ways"
 
         else:
