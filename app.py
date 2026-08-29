@@ -26,7 +26,7 @@ def send_message(chat_id, text):
 def get_drive_files():
     credentials = service_account.Credentials.from_service_account_file(
         GOOGLE_KEY_FILE,
-        scopes=["https://www.googleapis.com/auth/drive.readonly"]
+        scopes=["https://www.googleapis.com/auth/drive"]
     )
 
     drive = build(
