@@ -133,8 +133,8 @@ def webhook():
                 print("Cover error:", e)
                 msg = "❌ ดึงรูปจาก Google Drive ไม่สำเร็จ กรุณาตรวจสอบ Logs"
     
-        else:
-            msg = "กรุณาระบุชื่อเกม เช่น\n/cover Mahjong Ways"
+            else:
+                msg = "กรุณาระบุชื่อเกม เช่น\n/cover Mahjong Ways"
 
         else:
             msg = "พิมพ์ /start เพื่อเริ่มใช้งาน"
