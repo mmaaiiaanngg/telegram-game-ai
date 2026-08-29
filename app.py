@@ -57,7 +57,18 @@ def download_drive_file(file_id):
     )
 
     return drive.files().get_media(fileId=file_id).execute()
+def get_drive_service():
+    credentials = service_account.Credentials.from_service_account_file(
+        GOOGLE_KEY_FILE,
+        scopes=["https://www.googleapis.com/auth/drive"]
+    )
 
+    return build(
+        "drive",
+        "v3",
+        credentials=credentials,
+        cache_discovery=False
+    )
 @app.route("/")
 def home():
     return "Bot is running"
