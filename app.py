@@ -1,7 +1,7 @@
 from flask import Flask, request
 import requests
 import os
-
+import random
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
@@ -109,7 +109,7 @@ def webhook():
                 ]
     
                 if matched_files:
-                    image_file = matched_files[0]
+                    image_file = random.choice(matched_files)
                     image_bytes = download_drive_file(image_file["id"])
     
                     requests.post(
