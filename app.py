@@ -5,6 +5,8 @@ import random
 import zipfile
 import tempfile
 import mimetypes
+import threading
+
 from google.oauth2 import service_account
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.discovery import build
@@ -116,6 +118,37 @@ def download_dropbox_zip():
             temp_file.write(chunk)
     temp_file.close()
     return temp_file.name
+def extract_dropbox_zip(zip_path):
+    extract_dir = tempfile.mkdtemp()
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall(extract_dir)
+    return extract_dir
+def import_games_to_drive(extract_dir):
+    drive = get_drive_service()    
+    for root, dirs, files in os.walk(extract_dir):
+        if not files:
+            continue
+        game_name = os.path.basename(root)
+        folder_id = get_or_create_game_folder(game_name)            
+        for filename in files:
+            file_path = os.path.join(root, filename)
+            mime_type, _ = mimetypes.guess_type(file_path)
+            media = MediaFileUpload(file_path, mimetype=mime_type, resumable=False)
+            metadata = {"name": filename, "parents": [folder_id]}
+            drive.files().create(
+                body=metadata,
+                media_body=media
+            ).execute()
+def run_import(chat_id):
+    try:
+        zip_path = download_dropbox_zip()
+        extract_dir = extract_dropbox_zip(zip_path)
+        import_games_to_drive(extract_dir)
+        send_message(chat_id, "✅ นำเข้ารูปไป Google Drive เรียบร้อยแล้ว")
+    except Exception as e:
+        print("Import error:", e)
+        send_message(chat_id, "❌ นำเข้ารูปไม่สำเร็จ กรุณาตรวจสอบ Logs")
+
 @app.route("/")
 def home():
     return "Bot is running"
@@ -151,10 +184,13 @@ def webhook():
             except Exception as e:
                 print("Drive error:", e)
                 msg = "❌ ยังอ่าน Google Drive ไม่สำเร็จ กรุณาตรวจสอบ Logs"
-
+ 
+                elif text == "/import":
+            msg = "⏳ กำลังนำเข้ารูปจาก Dropbox ไป Google Drive..."
+            threading.Thread(target=run_import, args=(chat_id,), daemon=True).start()
         elif text.startswith("/cover"):
             game = text.replace("/cover", "").strip()
-    
+            
         if game:
             try:
                 files = get_drive_files()
