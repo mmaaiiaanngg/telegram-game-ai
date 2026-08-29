@@ -69,6 +69,37 @@ def get_drive_service():
         credentials=credentials,
         cache_discovery=False
     )
+
+def get_or_create_game_folder(game_name):
+    drive = get_drive_service()
+
+    query = (
+        f"name = '{game_name}' "
+        f"and mimeType = 'application/vnd.google-apps.folder' "
+        f"and '{DRIVE_FOLDER_ID}' in parents "
+        f"and trashed = false"
+    )
+
+    result = drive.files().list(
+        q=query,
+        fields="files(id, name)"
+    ).execute()
+
+    folders = result.get("files", [])
+
+    if folders:
+        return folders[0]["id"]
+
+    folder = drive.files().create(
+        body={
+            "name": game_name,
+            "mimeType": "application/vnd.google-apps.folder",
+            "parents": [DRIVE_FOLDER_ID]
+        },
+        fields="id"
+    ).execute()
+
+    return folder["id"]
 @app.route("/")
 def home():
     return "Bot is running"
