@@ -104,6 +104,18 @@ def get_or_create_game_folder(game_name):
     ).execute()
 
     return folder["id"]
+def download_dropbox_zip():
+    response = requests.get(DROPBOX_SHARED_URL, stream=True, timeout=120)
+    response.raise_for_status()
+    temp_file = tempfile.NamedTemporaryFile(
+        delete=False,
+        suffix=".zip"
+    )
+    for chunk in response.iter_content(chunk_size=1024 * 1024):
+        if chunk:
+            temp_file.write(chunk)
+    temp_file.close()
+    return temp_file.name
 @app.route("/")
 def home():
     return "Bot is running"
