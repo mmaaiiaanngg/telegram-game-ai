@@ -272,7 +272,23 @@ def list_dropbox_files():
 
     return entries
 
+def list_dropbox_root():
+    response = requests.post(
+        "https://api.dropboxapi.com/2/files/list_folder",
+        headers=dropbox_headers(),
+        json={
+            "path": "",
+            "recursive": False,
+            "include_deleted": False,
+            "include_non_downloadable_files": False
+        },
+        timeout=60
+    )
 
+    response.raise_for_status()
+
+    return response.json().get("entries", [])
+    
 def download_dropbox_file(path):
     response = requests.post(
         "https://content.dropboxapi.com/2/files/download",
@@ -622,6 +638,7 @@ def import_dropbox_to_drive(chat_id):
 # COVER
 # ==================================================
 
+
 def find_cover_images(game_name):
     game_folder = find_game_folder(
         game_name
@@ -802,6 +819,34 @@ def webhook():
             args=(chat_id,),
             daemon=True
         ).start()
+
+        return "ok"
+
+        elif text == "/dropbox":
+        try:
+            entries = list_dropbox_root()
+
+            if not entries:
+                msg = "📂 Dropbox root ว่าง"
+            else:
+                names = [
+                    f"• {item.get('name', '(ไม่มีชื่อ)')} | {item.get('.tag', '')}"
+                    for item in entries
+                ]
+
+                msg = (
+                    "📂 Dropbox root:\n\n"
+                    + "\n".join(names)
+                )
+
+            send_message(chat_id, msg)
+
+        except Exception as e:
+            print("Dropbox root error:", repr(e))
+            send_message(
+                chat_id,
+                "❌ อ่าน Dropbox root ไม่สำเร็จ กรุณาตรวจสอบ Logs"
+            )
 
         return "ok"
 
