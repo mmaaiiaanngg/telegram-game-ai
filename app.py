@@ -842,7 +842,7 @@ def webhook():
             send_message(chat_id, msg)
 
         except Exception as e:
-            print("Dropbox root error:", repr(e))
+            print("DROPBOX_ROOT_ERROR:", repr(e), flush=True)
             send_message(
                 chat_id,
                 "❌ อ่าน Dropbox root ไม่สำเร็จ กรุณาตรวจสอบ Logs"
