@@ -822,7 +822,7 @@ def webhook():
 
         return "ok"
 
-        elif text == "/dropbox":
+    elif text == "/dropbox":
         try:
             entries = list_dropbox_root()
 
